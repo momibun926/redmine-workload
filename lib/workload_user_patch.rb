@@ -46,13 +46,18 @@ module Workload
         # make issues into a :date=>:workload schedule
         for issue in issues
             duration = issue[:due_date] - issue[:start_date]
-            for i in 0..duration
-                date = issue[:start_date] + i
-                unless schedule[date]
-                    schedule[date] = 0
+            # チケットの期間を1日毎に分割
+            ary_issue_dates = (issue[:start_date]..issue[:due_date]).to_a
+            # 土日を除く
+            ary_issue_dates.delete_if{|x| x.cwday == 6 || x.cwday == 7}  
+            
+            # PV:日割りした工数を案分してセット
+            ary_issue_dates.each do |date|
+                if schedule[date].nil?
+                    schedule[date] = 0.0
                 end
                 schedule[date] += issue.workload
-            end
+            end                      
         end
 
         # merge schedule in following days with same workload into blocks

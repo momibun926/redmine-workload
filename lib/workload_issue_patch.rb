@@ -38,16 +38,26 @@ module Workload
     module InstanceMethods
       # Returns the duration in working days
       def working_duration
-        (start_date && due_date) ? working_days(start_date, due_date) : 0
+        if start_date && due_date
+          return  0
+        else
+            # チケットの期間を1日毎に分割
+            ary_issue_dates = (start_issue_date..end_issue_date).to_a
+            # 土日を除く
+            ary_issue_dates.delete_if{|x| x.cwday == 6 || x.cwday == 7}
+            return ary_issue_dates.size
+
+        end
+        
       end
 
       def workload
         estimate = self.estimated_hours.to_f
         duration = self.working_duration.to_f + 1.0
         if estimate > 0 and duration > 0
-          return (estimate / duration).round
+          return ((estimate / duration) * 10.0 ).round / 10.0
         end
-        return 0
+        return 0.0
       end
 
 

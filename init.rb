@@ -1,8 +1,5 @@
 require 'redmine'
 
-if Redmine::VERSION::MAJOR <= 2 and Redmine::VERSION::MINOR < 2
-    require_dependency 'workload_redmine20_patch'
-end
 require_dependency 'workload_issue_patch'
 require_dependency 'workload_user_patch'
 
