@@ -17,10 +17,16 @@ class WorkloadController < ApplicationController
   end
 
   def index
+
+    day = Date.today
+    @from_date = Date::new(day.year,day.month, 1)
+    end_date = @from_date  >> 1
+    @to_date = end_date - 1
+
     retrieve_query
 
     @project = Project.find(params[:project_id])
-    @issues = Issue.workload_estimable(@project).group_by(&:assigned_to)
+    @issues = Issue.workload_estimable(@project, @from_date, @to_date).group_by(&:assigned_to)
     puts @issues
   end
 

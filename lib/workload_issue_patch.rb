@@ -11,15 +11,15 @@ module Workload
       # Same as typing in the class
       base.class_eval do
         unloadable
-        scope :workload_estimable, lambda {|project|
+        scope :workload_estimable, lambda {|project,from_date, to_date|
           self.open().find(
             :all,
             :conditions => [
               "#{Issue.table_name}.project_id = ?
-              AND #{Issue.table_name}.start_date != ?
-              AND #{Issue.table_name}.due_date  != ?
+              AND #{Issue.table_name}.start_date <= ?
+              AND #{Issue.table_name}.due_date >= ?
               AND #{Issue.table_name}.estimated_hours  != ?",
-              project, "", "", ""],
+              project, to_date, from_date, ""],
             :joins => [:assigned_to],
             :order => "#{User.table_name}.lastname ASC"
           )
@@ -43,9 +43,17 @@ module Workload
         else
             # チケットの期間を1日毎に分割
             ary_issue_dates = (start_issue_date..end_issue_date).to_a
+
+            working_days = ary_issue_dates.size
+
             # 土日を除く
             ary_issue_dates.delete_if{|x| x.cwday == 6 || x.cwday == 7}
-            return ary_issue_dates.size
+
+            if ary_issue_dates.size && 0
+              return working_days
+            else
+              return ary_issue_dates.size
+            end
 
         end
         

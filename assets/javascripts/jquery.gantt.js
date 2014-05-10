@@ -744,7 +744,7 @@
                                         if (settings.scale === 'hours') {
                                             core.navigateTo(element, tools.getCellSize() * 8);
                                         } else if (settings.scale === 'days') {
-                                            core.navigateTo(element, tools.getCellSize() * 30);
+                                            core.navigateTo(element, tools.getCellSize() * 35);
                                         } else if (settings.scale === 'weeks') {
                                             core.navigateTo(element, tools.getCellSize() * 12);
                                         } else if (settings.scale === 'months') {

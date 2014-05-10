@@ -5,8 +5,8 @@
         "name": "<h3><%= user %></h3>",
         "desc": "",
         "values": [
-            <% last_block = user.workload(@project.id).last %>
-            <% for block in user.workload(@project.id) -%>
+            <% last_block = user.workload(@project.id, @from_date, @to_date).last %>
+            <% for block in user.workload(@project.id, @from_date, @to_date) -%>
             {
                 "from": "/Date('<%= block[:start_date] %>')/",
                 "to": "/Date('<%= block[:due_date] %>')/",

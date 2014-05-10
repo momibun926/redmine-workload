@@ -25,39 +25,51 @@ module Workload
             project_id, self.id
         )
       end
-      def workload_issues(project)
+      def workload_issues(project, from_date, to_date)
         return Issue.open().find(
            :all,
            :joins => [:assigned_to],
            :order => "#{User.table_name}.lastname ASC",
            :conditions => 
               ["#{Issue.table_name}.project_id = ?
-              AND #{Issue.table_name}.start_date != ?
-              AND #{Issue.table_name}.due_date  != ?
+              AND #{Issue.table_name}.start_date <= ?
+              AND #{Issue.table_name}.due_date  >= ?
               AND #{Issue.table_name}.estimated_hours  != ?
-              AND #{Issue.table_name}.assigned_to_id = ?", project, "", "", "", self.id]
+              AND #{Issue.table_name}.assigned_to_id = ?", project, to_date, from_date, "", self.id]
           )
 
       end
-      def workload(project)
-        issues = self.workload_issues(project)
+      def workload(project, from_date, to_date)
+        issues = self.workload_issues(project, from_date, to_date)
         schedule = {}
 
         # make issues into a :date=>:workload schedule
         for issue in issues
-            duration = issue[:due_date] - issue[:start_date]
             # チケットの期間を1日毎に分割
             ary_issue_dates = (issue[:start_date]..issue[:due_date]).to_a
+            ary_issue_dates_weekday = (issue[:start_date]..issue[:due_date]).to_a
+
             # 土日を除く
             ary_issue_dates.delete_if{|x| x.cwday == 6 || x.cwday == 7}  
-            
-            # PV:日割りした工数を案分してセット
-            ary_issue_dates.each do |date|
-                if schedule[date].nil?
-                    schedule[date] = 0.0
-                end
-                schedule[date] += issue.workload
-            end                      
+
+            if ary_issue_dates.size != 0
+                # PV:日割りした工数を案分してセット
+                ary_issue_dates.each do |date|
+                    if schedule[date].nil?
+                        schedule[date] = 0.0
+                    end
+                    schedule[date] += issue.workload
+                end   
+            else
+                # PV:日割りした工数を案分してセット
+                ary_issue_dates_weekday.each do |date|
+                    if schedule[date].nil?
+                        schedule[date] = 0.0
+                    end
+                    schedule[date] += issue.workload
+                end   
+            end
+         
         end
 
         # merge schedule in following days with same workload into blocks
